@@ -143,6 +143,7 @@ void loop() {
     check_pots();
     check_buttons();
     check_joysticks();
+    check_mode();
   }
 
   if (nrf_active && (millis() - lastNRFUpdate > nrfInterval)) tm_resp = nrf_check();
@@ -548,6 +549,13 @@ void check_buttons() {
       }
       led_strip.show();
     } else {
+      if (s1 == LOW) {
+      // Cycle through modes: 1 -> 2 -> 3 -> 4 -> 1 -> ...
+      mode_index++;
+      if (mode_index > 4) {
+        mode_index = 1;
+      }
+
       cur_rgb_val1[0] = 0; cur_rgb_val1[1] = 255; cur_rgb_val1[2] = 0;
       cur_rgb_val2[0] = 0; cur_rgb_val2[1] = 0; cur_rgb_val2[2] = 0;
       rgb_num = 99;
@@ -555,6 +563,7 @@ void check_buttons() {
       pattern_cnt = 1;
       pattern_int = 10;
       update_display(3);
+    }
     }
   }
 
@@ -575,12 +584,37 @@ void check_buttons() {
       }
       led_strip.show();
     } else {
+      
+      if (s2 == LOW) {
+      selected_mode = mode_index;
+      display2.clearDisplay();
+      display2.setCursor(0, 0);
+      display2.setTextSize(2);
+      switch (mode_index) {
+        case 1:
+          display2.print("Walk");
+          break;
+        case 2:
+          display2.print("Freestyle");
+          break;
+        case 3:
+          display2.print("Trot");
+          break;
+        case 4:
+        display2.print("Options");
+        break;
+      }
+      display2.setCursor(0, 20);
+      display2.setTextSize(1);
+      display2.print("SELECTED!");
+      display2.display();
       cur_rgb_val1[0] = 255; cur_rgb_val1[1] = 0; cur_rgb_val1[2] = 0;
       cur_rgb_val2[0] = 0; cur_rgb_val2[1] = 0; cur_rgb_val2[2] = 0;
       rgb_num = 99;
       pattern = 9;
       pattern_cnt = 1;
       pattern_int = 10;
+      }
     }
   }
 }
@@ -706,6 +740,9 @@ void check_joysticks() {
   }
 }
 
+void check_mode(){
+  tm_data[14] = selected_mode;
+}
 
 /*
    -------------------------------------------------------
@@ -802,43 +839,40 @@ void update_display(int dis) {
 
     lastDisplayUpdate = millis();
   } else if (dis == 3) {
-    byte mod = 1;
-    if (rc_data[6] < 5) {
-      mod = rc_data[6] + 1;
-    }
+      // Show currently selected_mode: 1=Walk, 2=Freestyle, 3=Trot, 4=Options
     display2.clearDisplay();
+
     display2.setCursor(55, 0);
     display2.setTextSize(1);
     display2.print("MODE ");
-    display2.print(mod);
+    display2.print(mode_index);   // e.g. prints "MODE 1" for Walk, etc.
+
     display2.setTextSize(2);
-    switch (mod) {
+    switch (mode_index) {
       case 1:
         display2.setCursor(44, 9);
-        display2.print("March");
-        break;
-      case 2:
-        display2.setCursor(52, 9);
         display2.print("Walk");
         break;
-      case 3:
+      case 2:
         display2.setCursor(19, 9);
         display2.print("Freestyle");
         break;
-      case 4:
+      case 3:
         display2.setCursor(51, 9);
         display2.print("Trot");
         break;
-      case 5:
-        display2.setCursor(39, 9);
-        display2.print("Follow");
+      case 4:
+        display2.setCursor(35, 9);
+        display2.print("Options");
         break;
     }
+
+    // You can add a small "hint" to press SEL2:
     display2.setCursor(40, 25);
     display2.setTextSize(1);
-    display2.print("Press Start");
-    display2.display();
+    display2.print("Press Sel2");
 
+    display2.display();
     lastDisplayUpdate = millis();
   } else if (dis == 4) {
     display.clearDisplay();

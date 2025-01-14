@@ -20,19 +20,19 @@ unsigned int nrfInterval = 60;
 unsigned long lastNRFUpdate = 0;
 uint8_t address[6] = "1Node";
 bool tm_resp;
-uint8_t tm_data[data_num] = {     //transmit data array
+uint8_t tm_data[data_num] = {     //transmit data array to robot
   0, 0, 0, 0,                     //btn1, btn2, btn3, btn4
   0, 0,                           //sel1, sel2
   0, 0, 0, 0,                     //p1, p2, p3, p4
-  0, 0, 0, 0                      //lx, ly, rx, ry
+  0, 0, 0, 0, selected_mode       //lx, ly, rx, ry, MODE
 };
 
 //DEV: for currently unused two-way communication
-uint8_t rc_data[data_num] = {     //receive data array
+uint8_t rc_data[data_num] = {     //receive data array from robot
   0, 0, 0,                        //battery, spd, volume
   0, 0, 0,                        //move_steps, step_weight_factor_front, step_weight_factor_rear
-  1, 0, 0, 0,                     //remote_select, start_mode
-  0, 0, 0, 0                      //
+  0, 0, 0, 0,                     //remote_select, start_mode
+  0, 0, 0, 0, 0                   //
 };
 
 //slide pots (4)
@@ -99,6 +99,8 @@ int b4 = 0;
 int b4p = 0;
 
 //select / stop buttons (2)
+int selected_mode = 1;    //Mode 1 = Walk, Mode 2 = Freestyle, Mode 3 = Trot, Mode 4 = Options
+int mode_index = 1; // start with "Walk" as the highlighted mode
 int s1 = 0;
 int s1p = 0;
 int s2 = 0;

@@ -28,7 +28,7 @@ extern RF24 radio;
 extern unsigned int nrfInterval;
 extern unsigned long lastNRFUpdate;
 extern uint8_t address[6];
-constexpr int data_num = 14;  //number of elements in data arrays
+constexpr int data_num = 15;  //number of elements in data arrays
 extern bool tm_resp;
 extern uint8_t tm_data[data_num];
 
@@ -115,6 +115,8 @@ extern int b4p;
 //select / stop buttons (2)
 #define SEL1_PIN 9  //left green
 #define SEL2_PIN 10 //right red
+extern int selected_mode; //is the currently selected Mode
+extern int mode_index; // the "highlighted" mode to be selected
 extern int s1;
 extern int s1p;
 extern int s2;
