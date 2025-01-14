@@ -61,6 +61,25 @@ void listen_serial_commands() {
     }
 }
 
+void get_remote_data(){
+   // Read the received data
+        radio.read(&receivedData, sizeof(receivedData));
+
+    //Write Robot Data to Ack-Array
+    ackData[6] = receivedData[14];  //Writes Mode of the Robot back to the Remote
+
+    //Send back Robot Data to Remote as AckPayload
+    radio.writeAckPayload(0, &ackData, sizeof(ackData));
+
+        // Debugging: Print the received data
+        Serial.print("Received Data: ");
+        for (size_t i = 0; i < sizeof(receivedData); i++) {
+            Serial.print(receivedData[i]);
+            Serial.print(" ");
+        }
+        Serial.println();
+}
+
 void walk_forward() {
     // Adjustments for each motor type
     int liftHeight = 400;          // How much Tibia lifts
@@ -173,7 +192,7 @@ void pushups(int durationInSeconds) {
 
         delay(700);  // Pause to hold the raised position
 
-        // Check if a stop command has been issued
+        // Check if a stop command has been issued via Serial
         if (Serial.available() > 0) {
             String stopCommand = Serial.readStringUntil('\n');
             stopCommand.trim();
@@ -181,6 +200,15 @@ void pushups(int durationInSeconds) {
                 Serial.println("Pushups stopped.");
                 break;
             }
+        }
+
+        //Check if stop command has been issued via Remote Stop Button
+        if (radio.available()) {
+        get_remote_data();  // This updates `receivedData[]`
+        }
+        if(receivedData[5] == 1){
+          Serial.println("Pushups stopped.");
+          break;
         }
     }
 

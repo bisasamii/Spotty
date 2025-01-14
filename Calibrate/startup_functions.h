@@ -10,6 +10,7 @@
 
 void loadNeutralPositions_EEPROM();
 void saveToEEPROM(int motorIndex, int position);
+void init_NRF24();
 void setMotorsToNeutralPositions();
 bool askUserForCalibration();
 void startCalibration();

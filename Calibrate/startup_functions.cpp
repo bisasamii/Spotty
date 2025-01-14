@@ -17,6 +17,22 @@ void saveToEEPROM(int motorIndex, int position) {
   EEPROM.put(motorIndex * sizeof(int), position); // Store position in EEPROM
 }
 
+void init_NRF24(){
+   if (!radio.begin()) {
+        Serial.println("NRF24 not responding. Check connections.");
+        while (1);
+    }
+    radio.setPALevel(RF24_PA_LOW);        // Set power level
+    radio.openReadingPipe(0, address);    // Open the correct pipe
+    radio.enableAckPayload();
+    radio.setPayloadSize(14);
+    radio.setAutoAck(true);              // Usually default
+    radio.setChannel(124);               // Use the same channel as the remote
+    radio.startListening();              // Start listening for data
+    Serial.println("NRF24 receiver initialized and listening...");
+}
+
+
 void setMotorsToNeutralPositions() {
   pwm.begin();
   pwm.setOscillatorFrequency(SERVO_OSC);

@@ -10,6 +10,7 @@
 
 
 void listen_serial_commands();
+void get_remote_data();
 void walk_forward();
 void pushups(int durationInSeconds = -1);
 void sit();

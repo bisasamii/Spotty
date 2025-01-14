@@ -23,11 +23,12 @@ extern int neutral_pos; //Calculates the neutral position of the servo through M
 extern int neutralPositions[ANZAHL_MOT]; //stores neutral positions for all motors
 extern int legPorts[4][3]; //stores what ports are connected to what leg
 extern String currentPosition;
+extern uint8_t ackData[15];
 
 //REMOTE DECLARATIONS
 extern RF24 radio; // Declare RF24 objectextern 
 extern const uint8_t address[6]; // Declare remote addresses
 //extern bool radioNumber; // Declare radio configuration
-extern uint8_t receivedData[14]; // Declare data storage
+extern uint8_t receivedData[15]; // Declare data storage
 
 #endif

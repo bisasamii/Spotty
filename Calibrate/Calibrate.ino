@@ -28,22 +28,11 @@ void setup() {
   Serial.println("Robot is now in standby position.");
 
 
-    // NRF24 Initialization
-    if (!radio.begin()) {
-        Serial.println("NRF24 not responding. Check connections.");
-        while (1);
-    }
-    radio.setPALevel(RF24_PA_LOW);        // Set power level
-    radio.openReadingPipe(0, address); // Open the correct pipe
-    radio.enableAckPayload();
-    radio.setPayloadSize(14);
-    radio.setAutoAck(true); // Usually default
-    radio.setChannel(124);               // Use the same channel as the remote
-    radio.startListening();              // Start listening for data
-    Serial.println("NRF24 receiver initialized and listening...");
+  // NRF24 Initialization
+  init_NRF24();
+  Serial.println("Initialization process for NRF24 ended.");
+
 }
-
-
 
 void loop() {
   
@@ -51,23 +40,49 @@ void loop() {
 
   // Check if data is available
     if (radio.available()) {
-        // Read the received data
-        radio.read(&receivedData, sizeof(receivedData));
-
-        // Debugging: Print the received data
-        Serial.print("Received Data: ");
-        for (size_t i = 0; i < sizeof(receivedData); i++) {
-            Serial.print(receivedData[i]);
-            Serial.print(" ");
-        }
-        Serial.println();
-
-        // Check if Button 1 (BTN1) is pressed
-        if (receivedData[0] == 1) { // Ensure this matches the remote's transmission
-            Serial.println("Button 1 pressed! Executing action...");
-            setMotorsToNeutralPositions(); // Perform the desired action
-        }
+       get_remote_data();  //Gets Data from Remote and also sends Robot Data back to the Remote
     }
+
+  switch (ackData[6]){    //Look what mode the Robot is in and run the respective code
+    case 1: //Walking
+
+    break;
+    case 2: //Freestyle
+    //In this Mode the Robot will not walk but move while staying in the same spot.
+    //Fire buttons each start a different move. Sel2 will act as Stop button.
+
+    //Check BTN1
+    if (receivedData[0] == 1){
+      Serial.println("BTN1 Pressed");
+      pushups();
+    }
+    
+    //Check BTN2
+    if (receivedData[1] == 1){
+      Serial.println("BTN2 Pressed");
+      sit();
+    }
+    //Check BTN3
+    if (receivedData[2] == 1){
+      Serial.println("BTN3 Pressed");
+      down();
+    }
+    //Check BTN4
+    if (receivedData[3] == 1){
+      Serial.println("BTN4 Pressed");
+      takeStandbyPosition();
+    }
+    break;
+
+    case 3: //Trot
+    
+    break;
+
+    case 4: //Options
+    
+    break;
+
+  }
 }
 
 

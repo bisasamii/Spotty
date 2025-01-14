@@ -3,10 +3,16 @@
 //REMOTE
 RF24 radio(CE_PIN, CSN_PIN); // Create RF24 object
 const uint8_t address[6] = "1Node"; // Define the same address as on your remote
-//bool radioNumber = 0;
-uint8_t receivedData[14]; // Array to store received data. Match size with remote's `tm_data`
+uint8_t receivedData[15]; // Array to store received data. Match size with remote's `tm_data`
 
 //ROBOT
+uint8_t ackData[15]= { //send data to remote
+  0, 0, 0,        //battery, spd, volume
+  0, 0, 0,        //move_steps, step_weight_factor_front, step_weight_factor_rear
+  0, 0, 0, 0,     //remote_select, start_mode
+  0, 0, 0, 0, 0,  //
+
+};
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(); //Initzialize PWM Driver
 int neutral_pos = USMIN + ((USMAX - USMIN) / 2);
 int neutralPositions[ANZAHL_MOT];
