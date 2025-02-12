@@ -17,6 +17,28 @@ void saveToEEPROM(int motorIndex, int position) {
   EEPROM.put(motorIndex * sizeof(int), position); // Store position in EEPROM
 }
 
+void init_MP3(){
+  mySoftwareSerial.begin(9600);
+  delay(1000);
+
+  Serial.println("Initializing DF-Player...");
+
+  //Init DF-Player
+  if (!myDFPlayer.begin(mySoftwareSerial)) {
+    Serial.println("DFPlayer Fehler!");
+    Serial.println("Prüfe Verkabelung und SD-Karte.");
+    while (true);  // Error while loop
+  }
+  
+  Serial.println("DFPlayer Mini ist online.");
+
+  //Start-Volume (Values: 0-30)
+  myDFPlayer.volume(30);
+
+  //Play first track
+  myDFPlayer.play(1);
+}
+
 void init_NRF24(){
    if (!radio.begin()) {
         Serial.println("NRF24 not responding. Check connections.");
@@ -32,6 +54,34 @@ void init_NRF24(){
     Serial.println("NRF24 receiver initialized and listening...");
 }
 
+void init_MagnetSensor(){
+  Wire1.begin();
+  compass.init();
+  Serial.println("Magnet-Sensor erfolgreich initialisiert.");
+
+
+  // Kurze Wartezeit (Sensor beruhigen lassen)
+  delay(500);
+
+  // Baseline messen
+  float sumMagnitude = 0.0;
+  for (int i = 0; i < BASELINE_SAMPLES; i++) {
+    compass.read();
+    float x = compass.getX();
+    float y = compass.getY();
+    float z = compass.getZ();
+    float mag = sqrt(x*x + y*y + z*z);
+
+    sumMagnitude += mag;
+    delay(80); // etwas warten zwischen den Messungen
+  }
+  baselineMagnitude = sumMagnitude / BASELINE_SAMPLES;
+
+  Serial.println("Baseline-Messung abgeschlossen.");
+  Serial.print("Gemittelte Magnitude: ");
+  Serial.println(baselineMagnitude);
+  Serial.println("Setup fertig!");
+}
 
 void setMotorsToNeutralPositions() {
   pwm.begin();

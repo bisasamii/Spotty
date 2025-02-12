@@ -10,7 +10,9 @@
 
 void loadNeutralPositions_EEPROM();
 void saveToEEPROM(int motorIndex, int position);
+void init_MP3();
 void init_NRF24();
+void init_MagnetSensor();
 void setMotorsToNeutralPositions();
 bool askUserForCalibration();
 void startCalibration();

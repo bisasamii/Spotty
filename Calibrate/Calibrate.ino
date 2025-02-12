@@ -4,7 +4,6 @@
 #include "loop_functions.h"
 
 
-
 void setup() {
   //Start serial communication and wait for connection
   Serial.begin(9600);
@@ -14,23 +13,30 @@ void setup() {
   // Load neutral positions from EEPROM
   loadNeutralPositions_EEPROM();
 
+  //MP3 Initialization
+  init_MP3();
+  Serial.println("Initialization process for MP3-Module ended. ");
+
+  //NRF24 Initialization
+  init_NRF24();
+  Serial.println("Initialization process for NRF24 ended.");
+
+  //Magnet-Sensor Initialization
+  init_MagnetSensor();
+  Serial.println("Initialization process for Magnet Sensor ended.");
+
   //Write saved neutral positions to motors
   setMotorsToNeutralPositions();
 
-  //Ask User to enter Calibration-Setup
-  bool calibrationCheck = askUserForCalibration();
-  if (calibrationCheck) {
-    startCalibration();
-  }
+  //Ask User to enter Calibration-Setup  #### Uncomment this for PC Serial Use
+  //bool calibrationCheck = askUserForCalibration();
+  //if (calibrationCheck) {
+  //  startCalibration();
+  //}
 
   //set robot to standby Position
   takeStandbyPosition();
   Serial.println("Robot is now in standby position.");
-
-
-  // NRF24 Initialization
-  init_NRF24();
-  Serial.println("Initialization process for NRF24 ended.");
 
 }
 
@@ -43,7 +49,7 @@ void loop() {
        get_remote_data();  //Gets Data from Remote and also sends Robot Data back to the Remote
     }
 
-  switch (ackData[6]){    //Look what mode the Robot is in and run the respective code
+  /*switch (ackData[6]){    //Look what mode the Robot is in and run the respective code
     case 1: //Walking
 
     break;
@@ -83,6 +89,46 @@ void loop() {
     break;
 
   }
+  */
+
+// Neue Sensorwerte einlesen
+  compass.read();
+  float x = compass.getX();
+  float y = compass.getY();
+  float z = compass.getZ();
+
+  // Aktuelle Magnitude berechnen
+  float currentMagnitude = sqrt(x*x + y*y + z*z);
+
+  // Differenz zur Baseline
+  float diff = fabs(currentMagnitude - baselineMagnitude);
+
+  // Serieller Monitor: Ausgabe von Rohwerten
+  Serial.print("X: "); Serial.print(x);
+  Serial.print("  Y: "); Serial.print(y);
+  Serial.print("  Z: "); Serial.print(z);
+  Serial.print("  |Mag. Feldstaerke|: ");
+  Serial.print(currentMagnitude);
+  Serial.print("  |Abweichung|: ");
+  Serial.print(diff);
+
+  // Prüfung: Wenn die Abweichung größer als der Threshold ist, Magnet erkannt
+  if (diff > MAGNET_DIFF_THRESHOLD) {
+    Serial.println("  -> Magnet erkannt!");
+    magneticDetection = true;
+  } else {
+    Serial.println("  -> Kein starker Magnet in der Naehe.");
+    magneticDetection = false;
+  }
+
+  if (magneticDetection == true && millis() - lastPlayTime > cooldownTime){
+    myDFPlayer.play(1);
+    lastPlayTime = millis();
+  }
+
+  delay(200);
+
+
 }
 
 

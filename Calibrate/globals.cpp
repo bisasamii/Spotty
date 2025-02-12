@@ -1,9 +1,21 @@
 #include "globals.h"
 
-//REMOTE
+//MP3
+SoftwareSerial mySoftwareSerial(0, 1);
+DFRobotDFPlayerMini myDFPlayer;
+
+//NRF
 RF24 radio(CE_PIN, CSN_PIN); // Create RF24 object
 const uint8_t address[6] = "1Node"; // Define the same address as on your remote
 uint8_t receivedData[15]; // Array to store received data. Match size with remote's `tm_data`
+
+//Magnet-SENSOR
+QMC5883LCompass compass;
+const int BASELINE_SAMPLES = 50;
+float baselineMagnitude = 0.0;
+bool magneticDetection = false;
+unsigned long lastPlayTime = 0;
+const unsigned long cooldownTime = 15000;
 
 //ROBOT
 uint8_t ackData[15]= { //send data to remote
