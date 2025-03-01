@@ -12,9 +12,12 @@
 void listen_serial_commands();
 void get_remote_data();
 void walk_forward();
+void trot_forward2();
+void walk_test();
 void pushups(int durationInSeconds = -1);
 void sit();
 void down();
 void paw(int durationInSeconds2 = -1);
 void showoff();
+void check_magnetic_field();
 #endif

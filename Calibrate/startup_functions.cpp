@@ -17,6 +17,14 @@ void saveToEEPROM(int motorIndex, int position) {
   EEPROM.put(motorIndex * sizeof(int), position); // Store position in EEPROM
 }
 
+void init_servos(){
+  Serial.println("Initializing Servo Motors...");
+  pwm.begin();
+  pwm.setOscillatorFrequency(SERVO_OSC);
+  pwm.setPWMFreq(SERVO_FREQ);
+  delay(10);
+}
+
 void init_MP3(){
   mySoftwareSerial.begin(9600);
   delay(1000);
@@ -33,10 +41,10 @@ void init_MP3(){
   Serial.println("DFPlayer Mini ist online.");
 
   //Start-Volume (Values: 0-30)
-  myDFPlayer.volume(30);
+  myDFPlayer.volume(25);
 
   //Play first track
-  myDFPlayer.play(1);
+  myDFPlayer.play(3);
 }
 
 void init_NRF24(){
@@ -84,16 +92,22 @@ void init_MagnetSensor(){
 }
 
 void setMotorsToNeutralPositions() {
-  pwm.begin();
-  pwm.setOscillatorFrequency(SERVO_OSC);
-  pwm.setPWMFreq(SERVO_FREQ);
-  delay(10);
 
   for (int i = 0; i < ANZAHL_MOT; i++) {
     int position = neutralPositions[i];
     pwm.writeMicroseconds(i, position); // Set each motor to its neutral position
     Serial.println("Motor " + String(i) + " auf gespeicherte Neutralposition gesetzt: " + String(position));
   }
+
+  //set currentPosition variable
+  currentPosition = "neutral";
+
+}
+
+void setMotorsToPosition(int servoPort, int position) {
+
+  pwm.writeMicroseconds(servoPort, position); // Set each motor to position
+  Serial.println("Motor " + String(servoPort) + " auf gespeicherte Neutralposition gesetzt: " + String(position));
 
   //set currentPosition variable
   currentPosition = "neutral";
@@ -129,10 +143,6 @@ bool askUserForCalibration() {
 
 void startCalibration() {
   Serial.println("Kalibrierung läuft...");
-  pwm.begin();
-  pwm.setOscillatorFrequency(SERVO_OSC);
-  pwm.setPWMFreq(SERVO_FREQ);
-  delay(10);
 
   for (int i = 0; i < ANZAHL_MOT; i++) {
     int position = neutralPositions[i]; // Start with loaded position
@@ -200,7 +210,7 @@ void takeStandbyPosition(){
     
     // Define the adjustments for each motor type
     int tibiaAdjustment = 200;
-    int femurAdjustment = -50;
+    int femurAdjustment = -100;
     int shoulderAdjustment = 0;
 
     // Define the leg movement order: Front Right, Back Left, Front Left, Back Right

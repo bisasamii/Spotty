@@ -33,6 +33,10 @@ void listen_serial_commands() {
             Serial.println("Walking forward...");
             walk_forward();
 
+        } else if (input.equalsIgnoreCase("trot_forward")) {
+            Serial.println("Trotting forward...");
+            trot_forward2();
+
         } else if (input.equalsIgnoreCase("pushups")) {
             Serial.println("Doing pushups...");
             pushups();
@@ -138,6 +142,84 @@ void walk_forward() {
             }
         }
     }
+}
+
+void trot_forward2() {
+    // Define motor positions relative to neutral position
+    int tibiaStartingPos = 50;       // Slightly forward
+    int tibiaInitialLift = 100;      // Small lift for smooth motion
+
+    int femurStartingPos = -50;      // Slightly backward
+    int FemurInitialLift = -20;      // Small initial lift
+    int FemurBackPos = -120;         // Extends contact with ground
+
+    // Define diagonal leg pairs: {Front Right & Back Left}, {Front Left & Back Right}
+    int legPairs[2][2] = {{0, 3}, {1, 2}};
+
+    // Infinite loop to keep trotting until a stop command is issued
+    while (true) {
+        for (int i = 0; i < 2; i++) {
+            int leg1 = legPairs[i][0];  // First leg in the pair
+            int leg2 = legPairs[i][1];  // Second leg in the pair
+
+            // Determine which ports to use based on leg index
+            int tibiaPort1 = legPorts[leg1][0];
+            int femurPort1 = legPorts[leg1][1];
+
+            int tibiaPort2 = legPorts[leg2][0];
+            int femurPort2 = legPorts[leg2][1];
+
+            // Get the leg direction for right and left legs
+            int direction1 = (leg1 % 2 == 0) ? 1 : -1; // Right legs: positive, Left legs: negative
+            int direction2 = (leg2 % 2 == 0) ? 1 : -1; // Right legs: positive, Left legs: negative
+
+            // **Step 1: Set initial positions (Starting Pos)**
+            pwm.writeMicroseconds(femurPort1, constrain(neutralPositions[femurPort1] + direction1 * femurStartingPos, USMIN, USMAX));
+            pwm.writeMicroseconds(femurPort2, constrain(neutralPositions[femurPort2] + direction2 * femurStartingPos, USMIN, USMAX));
+            pwm.writeMicroseconds(tibiaPort1, constrain(neutralPositions[tibiaPort1] + direction1 * tibiaStartingPos, USMIN, USMAX));
+            pwm.writeMicroseconds(tibiaPort2, constrain(neutralPositions[tibiaPort2] + direction2 * tibiaStartingPos, USMIN, USMAX));
+            delay(100);  // Short delay for stabilization
+
+            // **Step 2: Initial lift (Femur + Tibia)**
+            pwm.writeMicroseconds(femurPort1, constrain(neutralPositions[femurPort1] + direction1 * FemurInitialLift, USMIN, USMAX));
+            pwm.writeMicroseconds(femurPort2, constrain(neutralPositions[femurPort2] + direction2 * FemurInitialLift, USMIN, USMAX));
+            pwm.writeMicroseconds(tibiaPort1, constrain(neutralPositions[tibiaPort1] + direction1 * tibiaInitialLift, USMIN, USMAX));
+            pwm.writeMicroseconds(tibiaPort2, constrain(neutralPositions[tibiaPort2] + direction2 * tibiaInitialLift, USMIN, USMAX));
+            delay(120);  
+
+            // **Step 3: Move femur forward**
+            pwm.writeMicroseconds(femurPort1, constrain(neutralPositions[femurPort1], USMIN, USMAX));
+            pwm.writeMicroseconds(femurPort2, constrain(neutralPositions[femurPort2], USMIN, USMAX));
+            delay(120);  
+
+            // **Step 4: Lower Tibia (Contact ground)**
+            pwm.writeMicroseconds(tibiaPort1, neutralPositions[tibiaPort1]);
+            pwm.writeMicroseconds(tibiaPort2, neutralPositions[tibiaPort2]);
+            delay(120);  
+
+            // **Step 5: Extend ground contact (Femur bends back more)**
+            pwm.writeMicroseconds(femurPort1, constrain(neutralPositions[femurPort1] + direction1 * FemurBackPos, USMIN, USMAX));
+            pwm.writeMicroseconds(femurPort2, constrain(neutralPositions[femurPort2] + direction2 * FemurBackPos, USMIN, USMAX));
+            delay(150);  
+
+            // Small pause before switching to next pair
+            delay(50);
+        }
+
+        // Check if a stop command has been issued
+        if (Serial.available() > 0) {
+            String stopCommand = Serial.readStringUntil('\n');
+            stopCommand.trim();
+            if (stopCommand.equalsIgnoreCase("stop")) {
+                Serial.println("Trotting stopped.");
+                break;
+            }
+        }
+    }
+}
+
+void walk_test(){
+  
 }
 
 void pushups(int durationInSeconds) {
@@ -367,4 +449,33 @@ void showoff() {
   delay(1500);
   walk_forward();
    
+}
+
+void check_magnetic_field(){
+  // read sensor values
+  compass.read();
+  float x = compass.getX();
+  float y = compass.getY();
+  float z = compass.getZ();
+
+  // calculate total magnetic magnitude
+  float currentMagnitude = sqrt(x*x + y*y + z*z);
+
+  // calculate diff to basline
+  float diff = fabs(currentMagnitude - baselineMagnitude);
+
+  //If diff is greater than threshhol, there is a magnetic field
+  if (diff > MAGNET_DIFF_THRESHOLD) {
+    magneticDetection = true;
+  } else {
+    magneticDetection = false;
+  }
+
+  //if there is a magnetic field and the cooldownTime has passed, bark!
+  if (magneticDetection == true && millis() - lastPlayTime > cooldownTime){
+    myDFPlayer.play(4);
+    lastPlayTime = millis();
+  }
+
+  delay(200);
 }

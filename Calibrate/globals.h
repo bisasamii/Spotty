@@ -13,8 +13,27 @@
 #define USMAX  2600 // Maximum microsecond length for pulse
 #define SERVO_FREQ 60 // Analog servos run at ~50 Hz updates
 #define SERVO_OSC 25000000
+#define SERVO_DEGREERANGE 360
 #define ANZAHL_MOT 12
-#define NEUTRAL_INCREMENT 10  // Use a constant for calibration adjustments
+#define NEUTRAL_INCREMENT 5  // Use a constant for calibration adjustments
+
+//WALKING DEFINITIONS
+#define LOG_ENABLED
+#define LOG_LEVEL MYLOG_INFO
+
+#define COAX_SIZE 60.0
+#define FEMUR_SIZE 107.5
+#define TIBIA_SIZE 140.0
+
+#define BODY_WIDTH 80.0
+#define BODY_LENGTH 290.0
+
+#define STEP_SIZE 70
+#define STEP_SWING_HEIGHT_FRONT 25
+#define STEP_SWING_HEIGHT_REAR 25
+#define STEP_STANCE_HEIGHT_FRONT 3
+#define STEP_STANCE_HEIGHT_REAR 3
+#define STEP_STANCE_TIME_PERCENTAGE 0.75
 
 //NRF DEFINITIONS 
 #define CE_PIN 9          //Defines which pins are used for the NRF Antenna
@@ -49,5 +68,9 @@ extern float baselineMagnitude;     //The measured baseline Magintude of the Mag
 extern bool magneticDetection;
 extern unsigned long lastPlayTime;
 extern const unsigned long cooldownTime;
+
+//GLOBAL FUNCTIONS
+int pulse_to_angle(int pulse);
+int angle_to_pulse(int angle);
 
 #endif

@@ -2,7 +2,11 @@
 #include "globals.h"
 #include "startup_functions.h"
 #include "loop_functions.h"
-
+#include "MP3_files.h"
+#include "MyBody.h"
+#include "MyLeg.h"
+#include "ServoMotor.h"
+MyBody robot;
 
 void setup() {
   //Start serial communication and wait for connection
@@ -13,6 +17,11 @@ void setup() {
   // Load neutral positions from EEPROM
   loadNeutralPositions_EEPROM();
 
+  //Servo Initialization
+  init_servos();
+  robot.updateAllLegNeutralPositions();
+  Serial.println("Initialization process for Servos ended.");
+  
   //MP3 Initialization
   init_MP3();
   Serial.println("Initialization process for MP3-Module ended. ");
@@ -29,14 +38,17 @@ void setup() {
   setMotorsToNeutralPositions();
 
   //Ask User to enter Calibration-Setup  #### Uncomment this for PC Serial Use
-  //bool calibrationCheck = askUserForCalibration();
-  //if (calibrationCheck) {
-  //  startCalibration();
-  //}
+  bool calibrationCheck = askUserForCalibration();
+  if (calibrationCheck) {
+    startCalibration();
+  }
 
   //set robot to standby Position
   takeStandbyPosition();
   Serial.println("Robot is now in standby position.");
+
+  delay(1000);
+  myDFPlayer.play(5);
 
 }
 
@@ -51,6 +63,7 @@ void loop() {
 
   /*switch (ackData[6]){    //Look what mode the Robot is in and run the respective code
     case 1: //Walking
+    //Controls the robot with joysticks and checks for magnetic fields
 
     break;
     case 2: //Freestyle
@@ -85,50 +98,27 @@ void loop() {
     break;
 
     case 4: //Options
+    //In this mode you can reset the magnetic magnitude, calibrate the legs and set other global variables
     
     break;
 
-  }
-  */
+  }*/
+  
 
-// Neue Sensorwerte einlesen
-  compass.read();
-  float x = compass.getX();
-  float y = compass.getY();
-  float z = compass.getZ();
-
-  // Aktuelle Magnitude berechnen
-  float currentMagnitude = sqrt(x*x + y*y + z*z);
-
-  // Differenz zur Baseline
-  float diff = fabs(currentMagnitude - baselineMagnitude);
-
-  // Serieller Monitor: Ausgabe von Rohwerten
-  Serial.print("X: "); Serial.print(x);
-  Serial.print("  Y: "); Serial.print(y);
-  Serial.print("  Z: "); Serial.print(z);
-  Serial.print("  |Mag. Feldstaerke|: ");
-  Serial.print(currentMagnitude);
-  Serial.print("  |Abweichung|: ");
-  Serial.print(diff);
-
-  // Prüfung: Wenn die Abweichung größer als der Threshold ist, Magnet erkannt
-  if (diff > MAGNET_DIFF_THRESHOLD) {
-    Serial.println("  -> Magnet erkannt!");
-    magneticDetection = true;
-  } else {
-    Serial.println("  -> Kein starker Magnet in der Naehe.");
-    magneticDetection = false;
-  }
-
-  if (magneticDetection == true && millis() - lastPlayTime > cooldownTime){
-    myDFPlayer.play(1);
-    lastPlayTime = millis();
-  }
-
-  delay(200);
-
-
+  //check_magnetic_field();
+  
+  //TEST
+  Serial.println("TESTING");
+  delay(2000);
+  Serial.println("Neutral");
+  robot.goNeutral();
+  delay(2000);
+  Serial.println("Moved");
+  // Then move the same leg to new angles
+  robot.moveLeg(1, 170, 170, 170);
+  delay(2000);
+  Serial.println("END");
+  delay(1000);
 }
 
 
