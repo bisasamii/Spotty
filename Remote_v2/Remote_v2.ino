@@ -18,9 +18,9 @@
 
 
 void setup(){
-  Serial.begin(19200);
-  while (!Serial) {
-  }
+  //Serial.begin(19200);
+  //while (!Serial) {
+  //}
 
   delay(2000);
 
