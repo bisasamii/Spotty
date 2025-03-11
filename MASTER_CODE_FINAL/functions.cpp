@@ -69,11 +69,18 @@ void init_NRF24(){
     radio.setPALevel(RF24_PA_LOW);        // Set power level
     radio.openReadingPipe(0, address);    // Open the correct pipe
     radio.enableAckPayload();
-    radio.setPayloadSize(14);
+    radio.setPayloadSize(15);
     radio.setAutoAck(true);              // Usually default
     radio.setChannel(124);               // Use the same channel as the remote
     radio.startListening();              // Start listening for data
     Serial.println("NRF24 receiver initialized and listening...");
+}
+
+void check_Remote(){
+  if (radio.available()) {
+      remote_connected = true;
+    }
+    Serial.println("Remote is connected.");
 }
 
 void init_MagnetSensor(){
@@ -215,6 +222,40 @@ void get_remote_data(){
         Serial.println();
 }
 
+void get_joystick_commands(){
+  int jlx = receivedData[10];
+  int jly = receivedData[11];
+  Serial.print("Input X: ");
+  Serial.print(jlx);
+  Serial.print(", Input Y: ");
+  Serial.println(jly);
+  // Deadzone threshold to prevent false readings when the joystick is near the center
+  const int threshold = 5;
+
+  if (jlx >= 0 && jlx < threshold) {
+    currentPosition = "forward";
+  }
+  // "backwards" when X is near 255 (i.e. greater than center + threshold)
+  else if (jlx <= 255 && jlx > (255-threshold)) {
+    currentPosition = "backwards";
+  }
+  
+  // Check Y-axis for right/left commands
+  // "right" when Y is near 0 (i.e. less than center - threshold)
+  else if (jly >= 0 && jly < threshold) {
+    currentPosition = "right";
+  }
+  // "left" when Y is near 255 (i.e. greater than center + threshold)
+  else if (jly <= 255 && jly > (255-threshold)) {
+    currentPosition = "left";  }
+
+  else{
+    currentPosition = "middle";
+  }
+  
+
+}
+
 void check_magnetic_field(){
   // read sensor values
   compass.read();
@@ -240,6 +281,4 @@ void check_magnetic_field(){
     myDFPlayer.play(4);
     lastPlayTime = millis();
   }
-
-  delay(200);
 }

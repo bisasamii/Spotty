@@ -25,7 +25,9 @@ public:
   void update(unsigned long mills);
   void neutral();
   void GoPosition(unsigned long mills, double x, double y, double z, unsigned long duration, double ramp = 0.0);
+  void GoPosition(unsigned long mills, coords deltax, unsigned long duration, double ramp = 0.0);
   void logState();
+  void DoStep(unsigned long mills, double percentage, unsigned long duration, unsigned long turning);
 
   //----GET-----
   coords getPosition() {return mPosition;}
@@ -36,6 +38,7 @@ public:
 
 private:
   angle IKSolver(double x, double y, double z);
+  coords StepCurve(double percentage, unsigned long turning);
 
 };
 #endif

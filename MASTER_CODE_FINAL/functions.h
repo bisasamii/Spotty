@@ -25,7 +25,9 @@ void startCalibration();
 
 //Other functions
 void get_remote_data();
+void get_joystick_commands();
 void check_magnetic_field();
+void check_Remote();
 
 
 

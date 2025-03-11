@@ -9,12 +9,12 @@ MyBody robot;
 
 void setup() {
   //Initialize all components
-  init_serial();
+  //init_serial();
   init_servos();
-  //init_MP3();
-  //init_NRF24();
-  //init_MagnetSensor();
-
+  init_MP3();
+  init_NRF24();
+  init_MagnetSensor();
+  check_Remote();
   // Load neutral positions from EEPROM and write them to the robot and then take neutral Position
   loadNeutralPositions_EEPROM();
   //Calc Correction Values
@@ -63,65 +63,69 @@ void setup() {
 
   //Get the robot in the zero state to check if calibration is needed
   robot.goNeutral();
+  delay(1000);
 
   //Log the init state for every Motor
   robot.logState();
 
   //Ask User to enter Calibration-Setup  #### Uncomment this for PC Serial Use
-  bool calibrationCheck = askUserForCalibration();
-  if (calibrationCheck) {
-    startCalibration();
-  }
+  //bool calibrationCheck = askUserForCalibration();
+  //if (calibrationCheck) {
+    //startCalibration();
+  //}
 
   //Play Sniffing sound to end setup
-  delay(1000);
-  //myDFPlayer.play(5);
+  myDFPlayer.play(5);
+
+  //wait for remote to be connected
+  delay(2000);
 }
 
 
 void loop() {
-  //if (loopCount >= 600000) {
-        //Serial.print("Loop stopped after X runs.");
-        //while (1) { } // Halt execution indefinitely
-    //}
-  //Serial.println("-------------LOOPSTART---------------");
   static unsigned int last_mills = 0;
   unsigned long now_mills = millis();
+  robot.setGait(GAIT_TROT); // select WALK mode
 
   if (last_mills != now_mills)
   {
     last_mills = now_mills;
 
-    //Write data to the servo
-    Serial.println("__STARTING TEST2__");
-    test2(now_mills);
+    if (radio.available()) {
+      check_Remote();
+      get_remote_data();  //Gets Data from Remote and also sends Robot Data back to the Remote
+      get_joystick_commands();
+    }
+    //Serial.print("CurrentPos: ");
+    //Serial.println(currentPosition);
 
+    if(currentPosition == "forward"){
+      robot.StartWalk(600);
+    }
+
+    else if(currentPosition == "backwards"){
+      robot.StartWalk(600);
+    }
+
+    else if(currentPosition == "right"){
+      robot.StartWalk(600);
+      robot.WalkTurn(TURN_RIGHT);
+    }
+
+    else if(currentPosition == "left"){
+      robot.StartWalk(600);
+      robot.WalkTurn(TURN_LEFT);
+    }
+
+    else if(currentPosition == "middle"){
+      robot.StopWalk(now_mills);
+    }
     // Execute asynch servo movements
-    Serial.println("__STARTING UPDATE__");
     robot.update(now_mills);
+    check_magnetic_field();
   }
-  //loopCount++;
+
+    
 }
 
-// test walking
-void test2(unsigned long now_mills)
-{
-  static int test_phase = 0;
-  static unsigned int wait_until = 1000;
-
-  if (now_mills < wait_until)
-    return;
-
-  if (test_phase == 0)
-  {
-    // Go to walk initial position
-    // 900 = the going to walk position will be completed in 900ms
-    // 0.3 = servo speed ramp up for 30% then 60% constant then ramp dowm for 30%)
-    robot.GoWalkPosition(now_mills, 900, 0.3); // start stand-up at time delta=0ms then 1000ms pause (the stand-up duration is set to 900ms then 100ms do nothing)
-
-    test_phase++;
-    wait_until = now_mills + 3000; // wait 2s (where the movement home->walk position elapse 900ms)
-    return;
-  }
-}
 

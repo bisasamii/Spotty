@@ -8,6 +8,7 @@ DFRobotDFPlayerMini myDFPlayer;
 RF24 radio(CE_PIN, CSN_PIN); // Create RF24 object
 const uint8_t address[6] = "1Node"; // Define the same address as on your remote
 uint8_t receivedData[15]; // Array to store received data. Match size with remote's `tm_data`
+bool remote_connected = false;
 
 //Magnet-SENSOR
 QMC5883LCompass compass;
@@ -18,7 +19,6 @@ unsigned long lastPlayTime = 0;
 const unsigned long cooldownTime = 10000;
 
 //ROBOT
-int loopCount = 0;
 uint8_t ackData[15]= { //send data to remote
   0, 0, 0,        //battery, spd, volume
   0, 0, 0,        //move_steps, step_weight_factor_front, step_weight_factor_rear

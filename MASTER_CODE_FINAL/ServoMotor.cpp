@@ -20,7 +20,6 @@ ServoMotor::~ServoMotor()
 
 void ServoMotor::update(unsigned long mills)
 {
-  Serial.println("Updating Motor...");
   if (mId < 0)
     return;
 
@@ -31,11 +30,9 @@ void ServoMotor::update(unsigned long mills)
 
 			write_degree(mTargetDegree);
 			mIsMoving = false;
-      Serial.println("End of Movement reached.");
 		}
 		else //Time is smaller than end time which means that the movement is still performing
 		{
-      Serial.println("Performing movement change.");
       if (mTargetDegree == mCurrentDegree) //If Target is reached return
         return;
     
@@ -51,7 +48,6 @@ void ServoMotor::update(unsigned long mills)
 
         if (perc < mRamp) // ramp UP
 				{
-          Serial.println("------------------------------------RAMPING UP");
 					velocity = perc / mRamp *  velocitymax;
 
 					pos_degree = mStartDegree + perc * velocity / 2.0;
@@ -59,7 +55,6 @@ void ServoMotor::update(unsigned long mills)
 				}
 				else if (perc < (1.0 - mRamp)) // constant velocity
 				{
-          Serial.println("-------------------------------------------------------------CONSTANT VELOCITY");
 					velocity = velocitymax;
 
 					pos_degree = mStartDegree + (mRamp / 2.0 + perc - mRamp) * velocitymax;
@@ -67,7 +62,6 @@ void ServoMotor::update(unsigned long mills)
 				}
 				else // ramp DOWN
 				{
-          Serial.println("---------------------------------------------RAMPING DOWN");
 					velocity = (1.0 - perc) / mRamp * velocitymax;
 
 					pos_degree = mStartDegree + (1.0 - mRamp) * velocitymax - velocity * (1.0 - perc) / 2;
@@ -79,9 +73,6 @@ void ServoMotor::update(unsigned long mills)
 		    pos_degree = mStartDegree + (mTargetDegree - mStartDegree) * perc;
         
       }
-			
-      Serial.print("Write to servo Motor pos_degree= ");
-      Serial.println(pos_degree);
 			write_degree(pos_degree);
 		}
 	}
@@ -101,10 +92,6 @@ void ServoMotor::write_degree(double degree)
   
   // Update mCurrentDegree (using the non-corrected angle):
   mCurrentDegree = degree;
-
-  Serial.print("Calculated Pulse = ");
-  Serial.println(value_in_pulse);
-
   if (value_in_pulse != mCurrentPulse) // Only write if there's a change
   {
     pwm.writeMicroseconds(mId, value_in_pulse);

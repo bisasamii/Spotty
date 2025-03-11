@@ -3,6 +3,11 @@
 
 #include "MyLeg.h"
 
+#define GAIT_WALK 0
+#define GAIT_TROT 1
+#define GAIT_PACE 2
+#define GAIT_CANTER 3
+
 struct GaitFootDelays
 {
   double frontLeft;
@@ -41,7 +46,12 @@ public:
 void goNeutral();
 void update(unsigned long mills);
 void GoWalkPosition(unsigned long mills, unsigned long duration, double ramp = 0.0);
+void StartWalk(unsigned long single_step_duration);
+void WalkTurn(unsigned long value);
+void StopWalk(unsigned long mills);
+void WalkUpdate(unsigned long mills);
 void logState();
+void setGait(int mode);
   
 };
 
