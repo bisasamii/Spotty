@@ -2,7 +2,8 @@
 A quadruped Robot Dog based on the Boston Dynamics Spot
 This repository contains all documentation, CAD files, electronic schematics.
 
-![IMG20250304203419 (1)](https://github.com/user-attachments/assets/fc90bf6c-c09d-468d-a38f-691390b2c73a)
+<img src="https://github.com/user-attachments/assets/fc90bf6c-c09d-468d-a38f-691390b2c73a" alt="Spotty Robot" width="400"/>
+
 
 
 ## Project Overview
