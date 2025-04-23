@@ -2,6 +2,9 @@
 A quadruped Robot Dog based on the Boston Dynamics Spot
 This repository contains all documentation, CAD files, electronic schematics.
 
+![IMG20250304203419 (1)](https://github.com/user-attachments/assets/fc90bf6c-c09d-468d-a38f-691390b2c73a)
+
+
 ## Project Overview
 
 Spotty is a four-legged (quadruped) open-source robot designed as a low-threshold learning platform for young talents interested in robotics and quantum technologies. The robot is constructed from PLA and can be extended with various modules, including a low-cost NV-based quantum sensor. The project aims to inspire curiosity and provide practical access to complex technologies.
